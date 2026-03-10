@@ -3,7 +3,7 @@ services:
     name: my-income-tracker
     runtime: python
     buildCommand: ./build.sh
-    startCommand: python manage.py migrate && gunicorn incometracker.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    startCommand: python manage.py migrate && python -m gunicorn incometracker.wsgi:application --bind 0.0.0.0:$PORT --workers 2
     disk:
       name: sqlite-data
       mountPath: /data
