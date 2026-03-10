@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}My Income Tracker{% endblock %}</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#6EE04F" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="IncomeTracker" />
+  <meta name="application-name" content="IncomeTracker" />
+  <meta name="description" content="Track your income and expenses easily" />
+
+  <!-- Favicon + App Icons -->
+  <link rel="icon" type="image/png" href="/static/icons/favicon.png" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/static/manifest.json" />
+
+  <!-- Montserrat Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+          colors: {
+            brand: {
+              50:  '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10B981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    * { font-family: 'Montserrat', sans-serif; }
+
+    .sidebar { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500;
+      transition: all 0.15s ease; text-decoration: none;
+    }
+    .nav-active  { background: #ecfdf5; color: #047857; font-weight: 600; }
+    .nav-inactive { color: #6b7280; }
+    .nav-inactive:hover { background: #f9fafb; color: #111827; }
+
+    .card {
+      background: #ffffff; border-radius: 16px; padding: 24px;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.04);
+    }
+    .stat-card {
+      background: #ffffff; border-radius: 16px; padding: 20px;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .btn-primary {
+      background: #059669; color: #fff; font-weight: 600; font-size: 0.875rem;
+      padding: 10px 20px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all 0.15s ease; text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 1px 3px rgba(5,150,105,0.2);
+    }
+    .btn-primary:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(5,150,105,0.25); }
+
+    .btn-secondary {
+      background: #fff; color: #374151; font-weight: 500; font-size: 0.875rem;
+      padding: 10px 20px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1.5px solid #e5e7eb; cursor: pointer;
+      transition: all 0.15s ease; text-decoration: none;
+    }
+    .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
+
+    .btn-danger-solid {
+      background: #dc2626; color: #fff; font-weight: 600; font-size: 0.875rem;
+      padding: 10px 20px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 7px;
+      border: none; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-danger-solid:hover { background: #b91c1c; }
+
+    .input-field {
+      background: #fff; border: 1.5px solid #e5e7eb;
+      color: #111827; border-radius: 10px;
+      padding: 10px 14px; font-size: 0.875rem;
+      width: 100%; transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: 'Montserrat', sans-serif; outline: none;
+    }
+    .input-field:focus { border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    .input-field::placeholder { color: #9ca3af; }
+
+    .badge-income  { background: #ecfdf5; color: #065f46; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
+    .badge-expense { background: #fff1f2; color: #9f1239; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    #sidebar-overlay { display: none; }
+    #sidebar-overlay.open { display: block; }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen overflow-x-hidden">
+
+  <!-- Mobile Overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-20 lg:hidden" onclick="closeSidebar()"></div>
+
+  <div class="flex min-h-screen">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar"
+           class="sidebar w-64 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col
+                  fixed h-full z-30 overflow-y-auto
+                  -translate-x-full lg:translate-x-0">
+
+      <!-- Brand -->
+      <div class="px-5 py-5 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-brand-500 rounded-xl flex items-center justify-center shadow-sm">
+            <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <p class="font-bold text-gray-900 text-sm leading-tight">IncomeTracker</p>
+            <p class="text-gray-400 text-xs font-medium">Personal Finance</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 px-3 py-4 space-y-0.5">
+        <a href="{% url 'dashboard' %}"
+           class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}nav-active{% else %}nav-inactive{% endif %}">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+          Dashboard
+        </a>
+        <a href="{% url 'transaction_list' %}"
+           class="nav-item {% if 'transaction' in request.resolver_match.url_name %}nav-active{% else %}nav-inactive{% endif %}">
+          <i data-lucide="arrow-left-right" class="w-4 h-4 flex-shrink-0"></i>
+          Transactions
+        </a>
+        <a href="{% url 'category_list' %}"
+           class="nav-item {% if 'category' in request.resolver_match.url_name %}nav-active{% else %}nav-inactive{% endif %}">
+          <i data-lucide="tag" class="w-4 h-4 flex-shrink-0"></i>
+          Categories
+        </a>
+      </nav>
+
+      <!-- Quick Add CTA -->
+      <div class="px-3 pb-5">
+        <div class="bg-brand-50 rounded-2xl p-4 text-center">
+          <div class="w-8 h-8 bg-brand-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="plus" class="w-4 h-4 text-brand-600"></i>
+          </div>
+          <p class="text-xs text-gray-600 font-medium mb-3">Track every naira you earn or spend</p>
+          <a href="{% url 'transaction_add' %}" class="btn-primary w-full justify-center text-xs py-2.5">
+            Add Transaction
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 lg:ml-64 min-h-screen flex flex-col min-w-0 overflow-x-hidden">
+
+      <!-- Header -->
+      <header class="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-100
+                     px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+        <button onclick="openSidebar()"
+                class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors -ml-1 flex-shrink-0">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div class="flex-1 min-w-0">
+          <h1 class="font-bold text-lg text-gray-900 leading-tight truncate">{% block page_title %}Dashboard{% endblock %}</h1>
+          <p class="text-gray-400 text-xs mt-0.5 hidden sm:block">{% block page_subtitle %}Overview of your finances{% endblock %}</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          {% block header_actions %}{% endblock %}
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="flex-1 px-4 sm:px-6 py-5 max-w-screen-xl w-full mx-auto min-w-0">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.add('open');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(function (reg) { console.log('SW registered, scope:', reg.scope); })
+          .catch(function (err) { console.warn('SW registration failed:', err); });
+      });
+    }
+  </script>
+</body>
+</html>

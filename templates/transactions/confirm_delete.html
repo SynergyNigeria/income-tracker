@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Delete — Income Tracker{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+{% block page_subtitle %}This action cannot be undone{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+  <div class="card border border-red-100">
+    <div class="flex items-center gap-4 mb-5">
+      <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center flex-shrink-0 border border-red-100">
+        <i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
+      </div>
+      <div>
+        <h2 class="font-bold text-gray-900 text-base">Delete this item?</h2>
+        <p class="text-gray-500 text-sm mt-0.5">{{ item_name }}</p>
+      </div>
+    </div>
+    <p class="text-gray-500 text-sm mb-6 bg-gray-50 rounded-xl p-3">
+      ⚠️ This will permanently remove the item and cannot be recovered.
+    </p>
+    <div class="flex gap-3">
+      <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger-solid text-sm">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+          Yes, Delete
+        </button>
+      </form>
+      <a href="{% url cancel_url %}" class="btn-secondary text-sm">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Cancel
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

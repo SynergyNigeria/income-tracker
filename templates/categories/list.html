@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Categories — Income Tracker{% endblock %}
+{% block page_title %}Categories{% endblock %}
+{% block page_subtitle %}Manage your income and expense categories{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'category_add' %}" class="btn-primary text-sm">
+  <i data-lucide="plus" class="w-4 h-4"></i>
+  <span class="hidden sm:inline">New Category</span>
+  <span class="sm:hidden">New</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <!-- Income Categories -->
+  <div>
+    <div class="flex items-center gap-2 mb-3">
+      <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+      <h2 class="font-semibold text-gray-900 text-sm">Income Categories</h2>
+      <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-semibold px-2 py-0.5 rounded-full">
+        {{ income_categories.count }}
+      </span>
+    </div>
+
+    {% if income_categories %}
+    <div class="space-y-2">
+      {% for cat in income_categories %}
+      <div class="card flex items-center gap-4 py-4 hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+             style="background: {{ cat.color }}18">
+          <i data-lucide="{{ cat.icon }}" class="w-5 h-5" style="color: {{ cat.color }}"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 text-sm">{{ cat.name }}</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="w-2 h-2 rounded-full" style="background: {{ cat.color }}"></span>
+            <span class="text-xs text-gray-400">{{ cat.color }}</span>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-xs text-gray-400 font-medium">{{ cat.transactions.count }} txn{{ cat.transactions.count|pluralize }}</p>
+        </div>
+        <div class="flex gap-1 flex-shrink-0">
+          <a href="{% url 'category_edit' cat.pk %}"
+             class="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+             title="Edit">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+          </a>
+          <a href="{% url 'category_delete' cat.pk %}"
+             class="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+             title="Delete">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card flex flex-col items-center justify-center py-10 text-gray-400">
+      <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-2">
+        <i data-lucide="inbox" class="w-5 h-5"></i>
+      </div>
+      <p class="text-sm text-gray-500 font-medium">No income categories yet</p>
+      <a href="{% url 'category_add' %}" class="text-brand-600 text-xs mt-2 hover:text-brand-700 font-medium">Create one</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Expense Categories -->
+  <div>
+    <div class="flex items-center gap-2 mb-3">
+      <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+      <h2 class="font-semibold text-gray-900 text-sm">Expense Categories</h2>
+      <span class="bg-red-50 text-red-600 border border-red-100 text-xs font-semibold px-2 py-0.5 rounded-full">
+        {{ expense_categories.count }}
+      </span>
+    </div>
+
+    {% if expense_categories %}
+    <div class="space-y-2">
+      {% for cat in expense_categories %}
+      <div class="card flex items-center gap-4 py-4 hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+             style="background: {{ cat.color }}18">
+          <i data-lucide="{{ cat.icon }}" class="w-5 h-5" style="color: {{ cat.color }}"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 text-sm">{{ cat.name }}</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="w-2 h-2 rounded-full" style="background: {{ cat.color }}"></span>
+            <span class="text-xs text-gray-400">{{ cat.color }}</span>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-xs text-gray-400 font-medium">{{ cat.transactions.count }} txn{{ cat.transactions.count|pluralize }}</p>
+        </div>
+        <div class="flex gap-1 flex-shrink-0">
+          <a href="{% url 'category_edit' cat.pk %}"
+             class="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+             title="Edit">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+          </a>
+          <a href="{% url 'category_delete' cat.pk %}"
+             class="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+             title="Delete">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card flex flex-col items-center justify-center py-10 text-gray-400">
+      <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-2">
+        <i data-lucide="inbox" class="w-5 h-5"></i>
+      </div>
+      <p class="text-sm text-gray-500 font-medium">No expense categories yet</p>
+      <a href="{% url 'category_add' %}" class="text-brand-600 text-xs mt-2 hover:text-brand-700 font-medium">Create one</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

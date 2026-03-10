@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{% if transaction %}Edit{% else %}Add{% endif %} Transaction — Income Tracker{% endblock %}
+{% block page_title %}{% if transaction %}Edit Transaction{% else %}Add Transaction{% endif %}{% endblock %}
+{% block page_subtitle %}{% if transaction %}Update transaction details{% else %}Record a new income or expense{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="card">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Type Toggle -->
+      <div class="mb-5">
+        <label class="block text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wider">Transaction Type</label>
+        <div class="flex gap-3">
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="transaction_type" value="income" id="form_income"
+                   class="hidden peer"
+                   {% if not transaction or transaction.transaction_type == 'income' %}checked{% endif %} />
+            <div class="w-full py-3 rounded-xl border-2 border-gray-200 text-center font-semibold text-gray-500
+                        peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700
+                        transition-all text-sm flex items-center justify-center gap-2"
+                 onclick="document.getElementById('form_income').checked=true;filterCategorySelect('income')">
+              <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+              Income
+            </div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="transaction_type" value="expense" id="form_expense"
+                   class="hidden peer"
+                   {% if transaction and transaction.transaction_type == 'expense' %}checked{% endif %} />
+            <div class="w-full py-3 rounded-xl border-2 border-gray-200 text-center font-semibold text-gray-500
+                        peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-600
+                        transition-all text-sm flex items-center justify-center gap-2"
+                 onclick="document.getElementById('form_expense').checked=true;filterCategorySelect('expense')">
+              <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
+              Expense
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div class="mb-4">
+        <label for="id_amount" class="block text-sm text-gray-700 mb-1.5 font-semibold">
+          Amount (₦) <span class="text-red-500">*</span>
+        </label>
+        <input type="number" id="id_amount" name="amount" step="0.01" min="0.01" required
+               class="input-field text-lg font-semibold"
+               placeholder="0.00"
+               value="{{ transaction.amount|default:'' }}" />
+      </div>
+
+      <!-- Category -->
+      <div class="mb-4">
+        <label for="id_category" class="block text-sm text-gray-700 mb-1.5 font-semibold">
+          Category <span class="text-red-500">*</span>
+        </label>
+        <select id="id_category" name="category" required class="input-field">
+          <option value="">Select a category…</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}"
+                    data-type="{{ cat.type }}"
+                    {% if transaction and transaction.category_id == cat.id %}selected{% endif %}>
+              {{ cat.name }} ({{ cat.type }})
+            </option>
+          {% endfor %}
+        </select>
+        <p class="text-xs text-gray-400 mt-1">
+          Don't see a category? <a href="{% url 'category_add' %}" class="text-brand-600 hover:text-brand-700 font-medium">Create one</a>
+        </p>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <label for="id_description" class="block text-sm text-gray-700 mb-1.5 font-semibold">
+          Note <span class="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <input type="text" id="id_description" name="description"
+               class="input-field"
+               placeholder="e.g. Lunch at Chicken Republic, Payment for website…"
+               value="{{ transaction.description|default:'' }}" />
+      </div>
+
+      <!-- Date -->
+      <div class="mb-6">
+        <label for="id_date" class="block text-sm text-gray-700 mb-1.5 font-semibold">
+          Date <span class="text-red-500">*</span>
+        </label>
+        <input type="date" id="id_date" name="date" required
+               class="input-field w-full"
+               value="{{ transaction.date|date:'Y-m-d'|default:today }}" />
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button type="submit" class="btn-primary">
+          <i data-lucide="{% if transaction %}save{% else %}plus{% endif %}" class="w-4 h-4"></i>
+          {% if transaction %}Save Changes{% else %}Add Transaction{% endif %}
+        </button>
+        <a href="{% if transaction %}{% url 'transaction_list' %}{% else %}{% url 'dashboard' %}{% endif %}"
+           class="btn-secondary">
+          <i data-lucide="x" class="w-4 h-4"></i>
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterCategorySelect(type) {
+  const sel = document.getElementById('id_category');
+  Array.from(sel.options).forEach(opt => {
+    if (!opt.value) { opt.hidden = false; return; }
+    opt.hidden = opt.dataset.type !== type;
+  });
+  // keep selection if still valid
+  if (sel.options[sel.selectedIndex]?.hidden) sel.value = '';
+}
+
+// Init on load
+const checkedType = document.querySelector('input[name="transaction_type"]:checked')?.value || 'income';
+filterCategorySelect(checkedType);
+
+document.querySelectorAll('input[name="transaction_type"]').forEach(r =>
+  r.addEventListener('change', () => filterCategorySelect(r.value))
+);
+</script>
+{% endblock %}
+
