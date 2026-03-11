@@ -2,7 +2,9 @@
 # Render build script
 set -o errexit
 
-python3 -m pip install -r requirements.txt
+# Create venv and install dependencies
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
 
 # Collect static files
-python3 manage.py collectstatic --no-input
+./venv/bin/python manage.py collectstatic --no-input
